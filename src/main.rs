@@ -13,7 +13,7 @@ use std::hash::{Hash, Hasher};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct SignedResponse {
-    hash: u64,
+    signature: u64,
     data: String
 }
 
@@ -89,7 +89,7 @@ fn decrypt_json(key: String, nonce: String, json: &mut Value) {
 async fn sign(payload: String) -> Result<HttpResponse, Error> {
     let mut hasher = DefaultHasher::new();
     payload.hash(&mut hasher);
-    let response = SignedResponse{ hash: hasher.finish(), data: payload };
+    let response = SignedResponse{ signature: hasher.finish(), data: payload };
     let response = serde_json::to_string(&response)?;
     Ok(HttpResponse::Ok().body(response).into())
 }
