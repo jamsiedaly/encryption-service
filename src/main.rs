@@ -9,11 +9,11 @@ use std::sync::Mutex;
 use std::fs::File;
 use std::io::Write;
 use std::collections::hash_map::DefaultHasher;
-use std::hash::Hash;
+use std::hash::{Hash, Hasher};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct SignedResponse {
-    hash: String,
+    hash: u64,
     data: String
 }
 
@@ -88,9 +88,8 @@ fn decrypt_json(key: String, nonce: String, json: &mut Value) {
 
 async fn sign(payload: String) -> Result<HttpResponse, Error> {
     let mut hasher = DefaultHasher::new();
-    let hash = payload.clone();
-    hash.hash(&mut hasher);
-    let response = SignedResponse{ hash, data: payload };
+    payload.hash(&mut hasher);
+    let response = SignedResponse{ hash: hasher.finish(), data: payload };
     let response = serde_json::to_string(&response)?;
     Ok(HttpResponse::Ok().body(response).into())
 }
